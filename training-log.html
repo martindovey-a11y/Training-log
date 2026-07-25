@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Training Log · Trail Marathon</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Inter+Tight:wght@500;600;700&display=swap');
+
+:root {
+  --bg:       #F7F7F5;
+  --surface:  #FFFFFF;
+  --border:   #E8E6E1;
+  --border2:  #D4D0C8;
+  --text:     #1A1A1A;
+  --sub:      #6B6760;
+  --faint:    #A8A49C;
+  --accent:   #E07A5F;
+  --accent-l: #FDF0EC;
+  --accent-d: #C4614A;
+  --green:    #3D8B6E;
+  --green-l:  #EBF5F0;
+  --blue:     #4A7FA5;
+  --blue-l:   #EBF3F9;
+  --amber:    #C49A3C;
+  --amber-l:  #FBF5E6;
+  --red:      #C45C4A;
+  --red-l:    #FAECEA;
+  --sans:     'Inter', system-ui, sans-serif;
+  --tight:    'Inter Tight', system-ui, sans-serif;
+  --radius:   10px;
+  --shadow:   0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-m: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: var(--shadow);
+}
+
+.topbar-title {
+  font-family: var(--tight);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.topbar-meta {
+  font-size: 12px;
+  color: var(--sub);
+}
+
+.countdown-chip {
+  background: var(--accent-l);
+  color: var(--accent-d);
+  font-family: var(--tight);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+/* ── NAV TABS ── */
+.nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  padding: 0 20px;
+}
+
+.nav-btn {
+  padding: 11px 16px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--sub);
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.nav-btn:hover { color: var(--text); }
+.nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── PAGES ── */
+.page { display: none; padding: 20px; max-width: 680px; margin: 0 auto; }
+.page.active { display: block; }
+
+/* ── SECTION LABEL ── */
+.slabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 10px;
+}
+
+/* ── WEEK STRIP ── */
+.week-strip-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+
+.week-strip {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.week-strip::-webkit-scrollbar { display: none; }
+
+.wk-btn {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  cursor: pointer;
+  transition: all 0.15s;
+  min-width: 44px;
+}
+
+.wk-btn:hover { border-color: var(--border2); background: var(--surface); }
+.wk-btn.active { background: var(--accent); border-color: var(--accent); }
+.wk-btn.logged { border-color: var(--green); background: var(--green-l); }
+.wk-btn.logged.active { background: var(--accent); border-color: var(--accent); }
+
+.wk-num {
+  font-family: var(--tight);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1;
+}
+.wk-btn.active .wk-num { color: #fff; }
+.wk-btn.logged .wk-num { color: var(--green); }
+.wk-btn.logged.active .wk-num { color: #fff; }
+
+.wk-date-sub {
+  font-size: 9px;
+  color: var(--faint);
+  margin-top: 3px;
+  line-height: 1;
+}
+.wk-btn.active .wk-date-sub { color: rgba(255,255,255,0.7); }
+
+/* ── WEEK HEADER ── */
+.week-header-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.week-header-left { }
+.whb-title {
+  font-family: var(--tight);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+.whb-sub { font-size: 12px; color: var(--sub); margin-top: 1px; }
+
+.phase-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.02em;
+}
+.phase-Base  { background: var(--blue-l);  color: var(--blue); }
+.phase-Build { background: var(--amber-l); color: var(--amber); }
+.phase-Peak  { background: #FEF0EC;        color: var(--accent-d); }
+.phase-Taper { background: var(--green-l); color: var(--green); }
+
+/* ── SESSION CARDS ── */
+.sessions-list { display: grid; gap: 10px; }
+
+.session-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.15s;
+}
+
+.sc-header {
+  padding: 12px 16px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sc-day-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--faint);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.sc-type {
+  font-family: var(--tight);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.tt-chip {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--accent-l);
+  color: var(--accent-d);
+  letter-spacing: 0.04em;
+}
+
+.logged-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--green);
+  background: var(--green-l);
+  padding: 4px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.sc-planned {
+  padding: 10px 16px;
+  font-size: 12px;
+  color: var(--sub);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  line-height: 1.6;
+}
+
+.sc-body { padding: 14px 16px; display: grid; gap: 12px; }
+
+/* ── FORM ELEMENTS ── */
+.field { display: flex; flex-direction: column; gap: 5px; }
+
+.field label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sub);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.field input, .field select, .field textarea {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%;
+  -webkit-appearance: none;
+}
+
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(224,122,95,0.12);
+  background: var(--surface);
+}
+
+.field input::placeholder, .field textarea::placeholder { color: var(--faint); }
+.field textarea { resize: vertical; min-height: 68px; line-height: 1.5; }
+.field input[readonly] { color: var(--faint); cursor: default; }
+.field input[readonly]:focus { border-color: var(--border); box-shadow: none; }
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* ── RPE ── */
+.rpe-grid {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.rpe-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--sub);
+  font-family: var(--tight);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rpe-btn:hover { border-color: var(--border2); background: var(--surface); }
+
+.rpe-btn.r1,.rpe-btn.r2,.rpe-btn.r3 { background:var(--green-l); border-color:var(--green); color:var(--green); }
+.rpe-btn.r4,.rpe-btn.r5,.rpe-btn.r6 { background:var(--blue-l); border-color:var(--blue); color:var(--blue); }
+.rpe-btn.r7,.rpe-btn.r8 { background:var(--amber-l); border-color:var(--amber); color:var(--amber); }
+.rpe-btn.r9,.rpe-btn.r10 { background:var(--red-l); border-color:var(--red); color:var(--red); }
+
+/* ── STATS ── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: var(--shadow);
+}
+
+.stat-val {
+  font-family: var(--tight);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+
+.stat-lbl {
+  font-size: 11px;
+  color: var(--faint);
+  font-weight: 500;
+}
+
+/* ── PROGRESS ── */
+.progress-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+}
+
+.progress-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.progress-label { font-size: 13px; font-weight: 500; color: var(--text); }
+.progress-pct { font-family: var(--tight); font-size: 13px; font-weight: 600; color: var(--accent); }
+
+.progress-track {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-d));
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+/* ── TT CHART ── */
+.tt-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+}
+
+.tt-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 80px;
+  margin-top: 12px;
+}
+
+.tt-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 4px; }
+.tt-bar { width: 100%; border-radius: 4px 4px 0 0; background: var(--accent); min-height: 3px; transition: height 0.3s; }
+.tt-bar-time { font-family: var(--tight); font-size: 9px; font-weight: 600; color: var(--accent-d); text-align: center; }
+.tt-bar-wk { font-size: 9px; color: var(--faint); text-align: center; }
+
+/* ── WEEK HISTORY ── */
+.history-list { display: grid; gap: 7px; }
+
+.history-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  box-shadow: var(--shadow);
+}
+
+.history-card:hover { border-color: var(--border2); box-shadow: var(--shadow-m); }
+.hc-title { font-size: 13px; font-weight: 500; color: var(--text); }
+.hc-sub { font-size: 12px; color: var(--sub); margin-top: 1px; }
+.hc-right { text-align: right; flex-shrink: 0; }
+.hc-tt { font-family: var(--tight); font-size: 13px; font-weight: 600; color: var(--accent); }
+.hc-sessions { font-size: 11px; color: var(--faint); margin-top: 1px; }
+
+/* ── FEEDBACK ── */
+.feedback-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+}
+
+.feedback-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.feedback-title { font-size: 13px; font-weight: 500; color: var(--text); }
+
+.gen-btn {
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: var(--accent-l);
+  color: var(--accent-d);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.gen-btn:hover { background: var(--accent); color: #fff; }
+.gen-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.feedback-body {
+  padding: 18px;
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--sub);
+}
+.feedback-body p { margin-bottom: 12px; }
+.feedback-body p:last-child { margin-bottom: 0; }
+.feedback-body strong { color: var(--text); font-weight: 500; }
+.feedback-empty { color: var(--faint); font-style: italic; }
+
+.note-info {
+  background: var(--blue-l);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--blue);
+  line-height: 1.6;
+}
+
+/* ── DATA PAGE ── */
+.data-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+}
+.data-section-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.data-section-sub { font-size: 12px; color: var(--sub); margin-bottom: 12px; line-height: 1.6; }
+
+.io-btn {
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--sans);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-primary { background: var(--text); color: #fff; border: none; }
+.btn-primary:hover { background: #333; }
+.btn-secondary { background: var(--surface); color: var(--sub); border: 1px solid var(--border); }
+.btn-secondary:hover { border-color: var(--border2); color: var(--text); }
+.btn-danger { background: var(--red-l); color: var(--red); border: 1px solid var(--red); }
+.btn-danger:hover { background: var(--red); color: #fff; }
+
+.import-area { display: none; margin-top: 12px; }
+.import-area textarea {
+  width: 100%; height: 80px; background: var(--bg);
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px 12px; font-size: 12px; color: var(--text);
+  font-family: monospace; resize: vertical; outline: none;
+}
+.import-area textarea:focus { border-color: var(--accent); }
+.import-confirm {
+  margin-top: 8px; padding: 8px 16px; border-radius: 8px;
+  background: var(--green); color: #fff; border: none;
+  font-size: 12px; font-weight: 500; cursor: pointer;
+}
+
+/* ── SPINNER ── */
+.spinner {
+  display: inline-block; width: 12px; height: 12px;
+  border: 2px solid var(--border); border-top-color: var(--accent);
+  border-radius: 50%; animation: spin 0.7s linear infinite;
+  vertical-align: middle; margin-right: 5px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--text); color: #fff; font-size: 13px; font-weight: 500;
+  padding: 10px 20px; border-radius: 20px; opacity: 0;
+  transition: opacity 0.25s; pointer-events: none; z-index: 200;
+  box-shadow: var(--shadow-m);
+}
+.toast.show { opacity: 1; }
+
+@media (max-width: 520px) {
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+  .field-row { grid-template-columns: 1fr; }
+  .topbar-meta { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:10px">
+    <svg width="44" height="36" viewBox="0 0 680 420" role="img" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+      <title>Trail Marathon shoe logo</title>
+      <path d="M 200 282 Q 192 252 202 226 Q 215 196 248 176 Q 282 156 338 148 Q 388 141 432 146 Q 472 151 500 170 Q 526 188 532 218 Q 538 246 528 272 L 524 282 L 520 298 Q 542 302 544 316 Q 546 330 526 338 Q 504 346 458 348 L 205 348 Q 162 346 148 334 Q 134 320 142 306 Q 150 292 175 286 L 175 282 Z" fill="#E07A5F"/>
+      <path d="M 310 158 Q 360 148 410 152 Q 450 156 476 170 Q 500 184 510 208 L 505 270 L 380 278 L 290 278 Q 270 265 258 245 Q 245 222 248 198 Q 252 178 270 168 Z" fill="white" fill-opacity="0.5"/>
+      <path d="M 200 282 Q 192 252 202 226 Q 215 196 248 176 Q 282 156 338 148 Q 388 141 432 146 Q 472 151 500 170 Q 526 188 532 218 Q 538 246 528 272 L 524 282 L 520 298 Q 542 302 544 316 Q 546 330 526 338 Q 504 346 458 348 L 205 348 Q 162 346 148 334 Q 134 320 142 306 Q 150 292 175 286 L 175 282 Z" fill="none" stroke="#1A1410" stroke-width="10" stroke-linejoin="round" stroke-linecap="round"/>
+      <path d="M 178 286 L 522 284" fill="none" stroke="#1A1410" stroke-width="6" stroke-linecap="round"/>
+      <path d="M 328 150 Q 342 138 362 137 Q 382 136 390 148 L 384 198 Q 366 190 348 192 Q 334 193 324 200 Z" fill="#E07A5F" stroke="#1A1410" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+      <path d="M 200 230 Q 220 210 260 196 Q 285 188 318 185 L 326 202 Q 295 206 272 215 Q 248 226 234 244 Z" fill="#1A1410"/>
+      <line x1="240" y1="196" x2="320" y2="185" stroke="#1A1410" stroke-width="7" stroke-linecap="round"/>
+      <line x1="250" y1="214" x2="322" y2="200" stroke="#1A1410" stroke-width="7" stroke-linecap="round"/>
+      <line x1="264" y1="232" x2="324" y2="216" stroke="#1A1410" stroke-width="7" stroke-linecap="round"/>
+      <line x1="280" y1="250" x2="326" y2="234" stroke="#1A1410" stroke-width="7" stroke-linecap="round"/>
+      <path d="M 426 152 Q 474 168 500 200 Q 515 222 512 256 L 498 258 Q 498 226 484 204 Q 466 178 432 162 Z" fill="#1A1410"/>
+      <path d="M 148 318 Q 118 324 96 338" fill="none" stroke="#1A1410" stroke-width="8" stroke-linecap="round"/>
+      <path d="M 152 338 Q 118 348 90 358" fill="none" stroke="#1A1410" stroke-width="6" stroke-linecap="round"/>
+      <path d="M 160 354 Q 132 360 110 370" fill="none" stroke="#1A1410" stroke-width="4" stroke-linecap="round"/>
+    </svg>
+    <div>
+      <div class="topbar-title">Trail Marathon Log</div>
+      <div class="topbar-meta">CS 4:55/km · D' 605m · 5 Dec 2026</div>
+    </div>
+  </div>
+  <div class="countdown-chip" id="countdown">— days</div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn active" onclick="showPage('log',this)">Log</button>
+  <button class="nav-btn" onclick="showPage('summary',this)">Summary</button>
+  <button class="nav-btn" onclick="showPage('feedback',this)">Feedback</button>
+  <button class="nav-btn" onclick="showPage('data',this)">Data</button>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- LOG -->
+<div class="page active" id="page-log">
+  <div class="week-strip-wrap">
+    <div class="slabel" style="margin-bottom:10px">Select week</div>
+    <div class="week-strip" id="week-selector"></div>
+  </div>
+  <div id="sessions-log-area"></div>
+</div>
+
+<!-- SUMMARY -->
+<div class="page" id="page-summary">
+  <div class="progress-card">
+    <div class="progress-row">
+      <div class="progress-label">Plan completion</div>
+      <div class="progress-pct" id="prog-pct">0%</div>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+    </div>
+    <div style="font-size:11px;color:var(--faint);margin-top:6px" id="prog-label">0 of 19 weeks logged</div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-val" id="stat-sessions">0</div><div class="stat-lbl">Sessions</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-km">0</div><div class="stat-lbl">km done</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-tts">0</div><div class="stat-lbl">TTs run</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-best-tt">—</div><div class="stat-lbl">Best TT</div></div>
+  </div>
+
+  <div class="tt-card">
+    <div class="slabel">4km TT progression</div>
+    <div class="tt-chart" id="tt-chart">
+      <div style="color:var(--faint);font-size:12px;font-style:italic;align-self:center">No TT times logged yet</div>
+    </div>
+  </div>
+
+  <div class="slabel" style="margin-bottom:8px">Logged weeks</div>
+  <div class="history-list" id="week-history">
+    <div style="color:var(--faint);font-size:12px;font-style:italic">No weeks logged yet.</div>
+  </div>
+</div>
+
+<!-- FEEDBACK -->
+<div class="page" id="page-feedback">
+  <div class="week-strip-wrap" style="margin-bottom:14px">
+    <div class="slabel" style="margin-bottom:10px">Select week to analyse</div>
+    <div class="week-strip" id="fb-week-selector"></div>
+  </div>
+
+  <div class="feedback-card">
+    <div class="feedback-header">
+      <div class="feedback-title" id="fb-week-label">Select a logged week above</div>
+      <button class="gen-btn" id="gen-btn" onclick="generateFeedback()">Generate feedback</button>
+    </div>
+    <div class="feedback-body" id="feedback-body">
+      <span class="feedback-empty">Select a logged week and press Generate feedback.</span>
+    </div>
+  </div>
+
+  <div class="note-info">
+    Feedback is generated by Claude using your logged sessions, RPE scores, TT times, and notes — read against your CS model and the planned week. It covers effort distribution, TT trend, and one focus for next week.
+  </div>
+</div>
+
+<!-- DATA -->
+<div class="page" id="page-data">
+  <div class="data-section">
+    <div class="data-section-title">Export log</div>
+    <div class="data-section-sub">Downloads your full training log as a JSON file. Save this regularly as a backup or to transfer to another device.</div>
+    <button class="io-btn btn-primary" onclick="exportData()">↓ Download backup</button>
+  </div>
+
+  <div class="data-section">
+    <div class="data-section-title">Import log</div>
+    <div class="data-section-sub">Restore a previously exported backup. This overwrites your current data.</div>
+    <button class="io-btn btn-secondary" onclick="toggleImport()">↑ Import from backup</button>
+    <div class="import-area" id="import-area">
+      <textarea id="import-json" placeholder="Paste exported JSON here…"></textarea>
+      <button class="import-confirm" onclick="importData()">Confirm import</button>
+    </div>
+  </div>
+
+  <div class="data-section">
+    <div class="data-section-title">Clear data</div>
+    <div class="data-section-sub">Permanently deletes all logged sessions. Export first.</div>
+    <button class="io-btn btn-danger" onclick="clearData()">✕ Clear all data</button>
+  </div>
+</div>
+
+<script>
+const RACE_DATE  = new Date('2026-12-05');
+const WEEK1_MON  = new Date('2026-07-27');
+
+function weekMonDate(w) {
+  const d = new Date(WEEK1_MON);
+  d.setDate(d.getDate() + (w-1)*7);
+  return d;
+}
+function fmtShort(d) {
+  return d.toLocaleDateString('en-ZA',{day:'numeric',month:'short'});
+}
+
+const PLAN = [
+  {w:1,phase:'Base',vol:32,long:14,sessions:[
+    {day:'Tue',date:'28 Jul',type:'Easy road',planned:'9km easy. Fully conversational throughout.',tt:false,kmT:9},
+    {day:'Wed',date:'29 Jul',type:'Structured intervals',planned:'10min w/up · 4×3min @ 3:50/km (Z5) w/ 3min jog recovery · 10min c/dn',tt:false,kmT:9},
+    {day:'Fri',date:'31 Jul',type:'Easy road',planned:'8km easy Z1–Z2.',tt:false,kmT:8},
+    {day:'Sat',date:'1 Aug',type:'Long run',planned:'14km easy. Eat and drink every 30min.',tt:false,kmT:14},
+  ]},
+  {w:2,phase:'Base',vol:35,long:16,sessions:[
+    {day:'Tue',date:'4 Aug',type:'Easy road',planned:'9km easy Z2.',tt:false,kmT:9},
+    {day:'Wed',date:'5 Aug',type:'4km Club TT',planned:'15min easy w/up · 4km TT race effort · 10min easy c/dn · Target: ~16:20',tt:true,kmT:10,ttTarget:'~16:20'},
+    {day:'Fri',date:'7 Aug',type:'Easy road',planned:'9km easy.',tt:false,kmT:9},
+    {day:'Sat',date:'8 Aug',type:'Long run',planned:'16km easy. Time on feet, not pace.',tt:false,kmT:16},
+  ]},
+  {w:3,phase:'Base',vol:38,long:18,sessions:[
+    {day:'Tue',date:'11 Aug',type:'Easy road',planned:'10km easy.',tt:false,kmT:10},
+    {day:'Wed',date:'12 Aug',type:'Structured intervals',planned:'10min w/up · 5×3min @ 3:50/km (Z5) w/ 2:30 jog · 10min c/dn',tt:false,kmT:10},
+    {day:'Fri',date:'14 Aug',type:'Easy road',planned:'10km easy.',tt:false,kmT:10},
+    {day:'Sat',date:'15 Aug',type:'Long run',planned:'18km easy. Walk any hills.',tt:false,kmT:18},
+  ]},
+  {w:4,phase:'Base',vol:36,long:16,sessions:[
+    {day:'Tue',date:'18 Aug',type:'Easy road',planned:'10km easy. Cutback week.',tt:false,kmT:10},
+    {day:'Wed',date:'19 Aug',type:'4km Club TT',planned:'15min easy w/up · 4km TT · compare to W2 baseline · 10min c/dn',tt:true,kmT:10,ttTarget:'Compare W2'},
+    {day:'Fri',date:'21 Aug',type:'Easy road',planned:'8km easy.',tt:false,kmT:8},
+    {day:'Sat',date:'22 Aug',type:'Long run',planned:'16km easy.',tt:false,kmT:16},
+  ]},
+  {w:5,phase:'Base',vol:42,long:20,sessions:[
+    {day:'Tue',date:'25 Aug',type:'Easy road',planned:'11km easy.',tt:false,kmT:11},
+    {day:'Wed',date:'26 Aug',type:'Structured intervals',planned:'10min w/up · 3×6min @ 5:00/km (Z4) w/ 3min jog · 10min c/dn',tt:false,kmT:11},
+    {day:'Fri',date:'28 Aug',type:'Easy road',planned:'10km easy.',tt:false,kmT:10},
+    {day:'Sat',date:'29 Aug',type:'Long run',planned:'20km. First 20km milestone. Fuel every 30min.',tt:false,kmT:20},
+  ]},
+  {w:6,phase:'Base',vol:38,long:16,sessions:[
+    {day:'Tue',date:'1 Sep',type:'Easy road',planned:'10km easy.',tt:false,kmT:10},
+    {day:'Wed',date:'2 Sep',type:'4km Club TT',planned:'15min easy w/up · 4km TT · target sub-16:10 · 10min c/dn',tt:true,kmT:10,ttTarget:'Sub-16:10?'},
+    {day:'Fri',date:'4 Sep',type:'Easy road',planned:'8km easy.',tt:false,kmT:8},
+    {day:'Sat',date:'5 Sep',type:'Long run',planned:'16km easy trail if possible.',tt:false,kmT:16},
+  ]},
+  {w:7,phase:'Build',vol:44,long:22,sessions:[
+    {day:'Tue',date:'8 Sep',type:'Easy road',planned:'12km easy. Build phase begins.',tt:false,kmT:12},
+    {day:'Wed',date:'9 Sep',type:'Structured intervals',planned:'10min w/up · 4×5min @ 5:00/km (Z4) w/ 2:30 jog · 10min c/dn',tt:false,kmT:10},
+    {day:'Fri',date:'11 Sep',type:'Easy road',planned:'10km easy.',tt:false,kmT:10},
+    {day:'Sat',date:'12 Sep',type:'Long run trail',planned:'22km. Trail preferred — walk the climbs.',tt:false,kmT:22},
+  ]},
+  {w:8,phase:'Build',vol:48,long:24,sessions:[
+    {day:'Tue',date:'15 Sep',type:'Easy road',planned:'12km easy.',tt:false,kmT:12},
+    {day:'Wed',date:'16 Sep',type:'4km Club TT',planned:'15min easy w/up · 4km TT · target sub-16:10 · 10min c/dn',tt:true,kmT:12,ttTarget:'Sub-16:10'},
+    {day:'Fri',date:'18 Sep',type:'Easy road',planned:'12km easy.',tt:false,kmT:12},
+    {day:'Sat',date:'19 Sep',type:'Long run trail',planned:'24km trail. Gel every 40min from now on.',tt:false,kmT:24},
+  ]},
+  {w:9,phase:'Build',vol:50,long:26,sessions:[
+    {day:'Tue',date:'22 Sep',type:'Easy road',planned:'12km easy.',tt:false,kmT:12},
+    {day:'Wed',date:'23 Sep',type:'Structured intervals',planned:'10min w/up · 3×8min @ 5:05/km (Z3/Z4) w/ 3min jog · 10min c/dn',tt:false,kmT:12},
+    {day:'Fri',date:'25 Sep',type:'Easy road',planned:'12km easy.',tt:false,kmT:12},
+    {day:'Sat',date:'26 Sep',type:'Long run trail',planned:'26km. Split into 16+10km mentally if needed.',tt:false,kmT:26},
+  ]},
+  {w:10,phase:'Build',vol:54,long:28,sessions:[
+    {day:'Tue',date:'29 Sep',type:'Easy road',planned:'14km easy.',tt:false,kmT:14},
+    {day:'Wed',date:'30 Sep',type:'4km Club TT',planned:'15min w/up · 4km TT · feel-based · 10min c/dn',tt:true,kmT:14,ttTarget:'Feel-based'},
+    {day:'Fri',date:'2 Oct',type:'Easy road',planned:'12km easy.',tt:false,kmT:12},
+    {day:'Sat',date:'3 Oct',type:'Long run trail',planned:'28km trail. Longest to date. Eat early, eat often.',tt:false,kmT:28},
+  ]},
+  {w:11,phase:'Build',vol:48,long:24,sessions:[
+    {day:'Tue',date:'6 Oct',type:'Easy road',planned:'12km easy. Cutback before Peak.',tt:false,kmT:12},
+    {day:'Wed',date:'7 Oct',type:'Structured intervals',planned:'10min w/up · 2×12min @ 5:20/km (Z3) w/ 4min jog · 10min c/dn',tt:false,kmT:12},
+    {day:'Fri',date:'9 Oct',type:'Easy road',planned:'10km easy.',tt:false,kmT:10},
+    {day:'Sat',date:'10 Oct',type:'Long run trail',planned:'24km comfortable trail.',tt:false,kmT:24},
+  ]},
+  {w:12,phase:'Peak',vol:54,long:28,sessions:[
+    {day:'Tue',date:'13 Oct',type:'Easy road',planned:'14km easy. Peak phase — protect legs.',tt:false,kmT:14},
+    {day:'Wed',date:'14 Oct',type:'4km Club TT',planned:'15min w/up · 4km TT · 10min c/dn',tt:true,kmT:12,ttTarget:'Fitness check'},
+    {day:'Fri',date:'16 Oct',type:'Easy road',planned:'12km easy.',tt:false,kmT:12},
+    {day:'Sat',date:'17 Oct',type:'Long run trail',planned:'28km trail. Full race nutrition protocol.',tt:false,kmT:28},
+  ]},
+  {w:13,phase:'Peak',vol:58,long:30,sessions:[
+    {day:'Tue',date:'20 Oct',type:'Easy road',planned:'14km easy.',tt:false,kmT:14},
+    {day:'Wed',date:'21 Oct',type:'Structured intervals',planned:'10min w/up · 5×4min @ 4:50/km (Z4/Z5) w/ 2min jog · 10min c/dn',tt:false,kmT:12},
+    {day:'Fri',date:'23 Oct',type:'Easy road',planned:'12km easy.',tt:false,kmT:12},
+    {day:'Sat',date:'24 Oct',type:'Long run trail',planned:'30km trail. First 30km long run.',tt:false,kmT:30},
+  ]},
+  {w:14,phase:'Peak',vol:60,long:32,sessions:[
+    {day:'Tue',date:'27 Oct',type:'Easy road',planned:'16km easy. Must be easy.',tt:false,kmT:16},
+    {day:'Wed',date:'28 Oct',type:'4km Club TT',planned:'15min w/up · 4km TT · target sub-16:00 · 10min c/dn',tt:true,kmT:14,ttTarget:'Sub-16:00'},
+    {day:'Fri',date:'30 Oct',type:'Easy road',planned:'12km easy.',tt:false,kmT:12},
+    {day:'Sat',date:'31 Oct',type:'Long run trail',planned:'32km trail. Full race simulation — kit, nutrition, pacing.',tt:false,kmT:32},
+  ]},
+  {w:15,phase:'Peak',vol:56,long:28,sessions:[
+    {day:'Tue',date:'3 Nov',type:'Easy road',planned:'14km easy.',tt:false,kmT:14},
+    {day:'Wed',date:'4 Nov',type:'Structured intervals',planned:'10min w/up · 2×15min @ 5:20/km (Z3) w/ 4min jog · 10min c/dn',tt:false,kmT:14},
+    {day:'Fri',date:'6 Nov',type:'Easy road',planned:'12km easy.',tt:false,kmT:12},
+    {day:'Sat',date:'7 Nov',type:'Long run trail',planned:'28km trail. Solid and comfortable.',tt:false,kmT:28},
+  ]},
+  {w:16,phase:'Peak',vol:58,long:30,sessions:[
+    {day:'Tue',date:'10 Nov',type:'Easy road',planned:'14km easy.',tt:false,kmT:14},
+    {day:'Wed',date:'11 Nov',type:'4km Club TT',planned:'15min w/up · 4km TT · peak fitness marker · 10min c/dn',tt:true,kmT:14,ttTarget:'Peak marker'},
+    {day:'Fri',date:'13 Nov',type:'Easy road',planned:'12km easy.',tt:false,kmT:12},
+    {day:'Sat',date:'14 Nov',type:'Long run trail',planned:'30km trail. Final big long run.',tt:false,kmT:30},
+  ]},
+  {w:17,phase:'Taper',vol:46,long:24,sessions:[
+    {day:'Tue',date:'17 Nov',type:'Easy road',planned:'12km easy. Taper begins.',tt:false,kmT:12},
+    {day:'Wed',date:'18 Nov',type:'Taper tempo',planned:'10min w/up · 3×10min @ 5:20/km (Z3) w/ 3min jog · 10min c/dn',tt:false,kmT:14},
+    {day:'Fri',date:'20 Nov',type:'Easy road',planned:'10km easy.',tt:false,kmT:10},
+    {day:'Sat',date:'21 Nov',type:'Long run trail',planned:'24km easy. Last long run.',tt:false,kmT:24},
+  ]},
+  {w:18,phase:'Taper',vol:36,long:18,sessions:[
+    {day:'Tue',date:'24 Nov',type:'Easy road',planned:'10km easy. Feel the freshness returning.',tt:false,kmT:10},
+    {day:'Wed',date:'25 Nov',type:'4km Club TT',planned:'15min w/up · 4km TT · comfortably fast, not all-out · 10min c/dn',tt:true,kmT:10,ttTarget:'Comfortable fast'},
+    {day:'Fri',date:'27 Nov',type:'Easy road',planned:'8km easy.',tt:false,kmT:8},
+    {day:'Sat',date:'28 Nov',type:'Long run trail',planned:'18km easy. Finish feeling you could go further.',tt:false,kmT:18},
+  ]},
+  {w:19,phase:'Taper',vol:22,long:10,sessions:[
+    {day:'Tue',date:'1 Dec',type:'Easy shakeout',planned:'6km very easy. Zero effort.',tt:false,kmT:6},
+    {day:'Wed',date:'2 Dec',type:'Race prep',planned:'20min easy + 4×90sec Z4 strides + 10min easy',tt:false,kmT:6},
+    {day:'Fri',date:'4 Dec',type:'Shakeout',planned:'3–4km very easy jog. Short.',tt:false,kmT:4},
+    {day:'Sat',date:'5 Dec',type:'🏔 Race Day',planned:'Trail Marathon 42.2km · Start conservative · Walk the climbs · Fuel every 40min.',tt:false,kmT:42.2},
+  ]},
+];
+
+function loadLog(){try{return JSON.parse(localStorage.getItem('trailLog26')||'{}');}catch(e){return {};}}
+function saveLog(l){localStorage.setItem('trailLog26',JSON.stringify(l));}
+
+let log=loadLog(), currentLogWeek=0, currentFbWeek=0;
+
+// countdown
+function tick(){
+  const days=Math.ceil((RACE_DATE-new Date())/86400000);
+  document.getElementById('countdown').textContent=days>0?days+' days':'Race day!';
+}
+tick();
+
+function showPage(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='summary')renderSummary();
+  if(name==='feedback')renderFbSelector();
+}
+
+function buildStrip(id,fn,activeIdx){
+  document.getElementById(id).innerHTML=PLAN.map((w,i)=>{
+    const hasLog=log[i]&&Object.keys(log[i]).length>0;
+    const mon=weekMonDate(w.w);
+    const cls=`wk-btn${hasLog?' logged':''}${i===activeIdx?' active':''}`;
+    return `<button class="${cls}" onclick="${fn}(${i})">
+      <span class="wk-num">W${w.w}</span>
+      <span class="wk-date-sub">${fmtShort(mon)}</span>
+    </button>`;
+  }).join('');
+}
+
+function selectLogWeek(idx){
+  currentLogWeek=idx;
+  buildStrip('week-selector','selectLogWeek',idx);
+  renderLogWeek(idx);
+}
+
+function renderLogWeek(idx){
+  const week=PLAN[idx], wLog=log[idx]||{};
+  const mon=weekMonDate(week.w), sat=new Date(mon); sat.setDate(sat.getDate()+5);
+  document.getElementById('sessions-log-area').innerHTML=`
+    <div class="week-header-bar">
+      <div class="week-header-left">
+        <div class="whb-title">Week ${week.w} · ${week.vol}km</div>
+        <div class="whb-sub">${fmtShort(mon)} – ${fmtShort(sat)} · Long run ${week.long}km</div>
+      </div>
+      <span class="phase-badge phase-${week.phase}">${week.phase}</span>
+    </div>
+    <div class="sessions-list">${week.sessions.map((s,si)=>sessionCard(idx,si,s,wLog[si]||{})).join('')}</div>`;
+}
+
+function sessionCard(wIdx,sIdx,s,sl){
+  const id=`s_${wIdx}_${sIdx}`;
+  const saved=Object.keys(sl).length>0;
+  const ttFields=s.tt?`
+    <div class="field-row">
+      <div class="field"><label>TT time (mm:ss)</label>
+        <input type="text" id="${id}_tt" placeholder="16:20" value="${sl.ttTime||''}" oninput="autoSave(${wIdx},${sIdx})">
+      </div>
+      <div class="field"><label>Target</label>
+        <input type="text" value="${s.ttTarget||'—'}" readonly>
+      </div>
+    </div>`:'';
+  const rpe=[1,2,3,4,5,6,7,8,9,10].map(n=>{
+    const cls=sl.rpe==n?` r${n}`:'';
+    return `<button class="rpe-btn${cls}" id="${id}_rpe_${n}" onclick="setRpe(${wIdx},${sIdx},${n},'${id}')">${n}</button>`;
+  }).join('');
+  return `<div class="session-card">
+    <div class="sc-header">
+      <div>
+        <div class="sc-day-label">${s.day} · ${s.date}</div>
+        <div class="sc-type">${s.type}${s.tt?'<span class="tt-chip">TT</span>':''}</div>
+      </div>
+      ${saved?'<div class="logged-chip">✓ Logged</div>':''}
+    </div>
+    <div class="sc-planned">${s.planned}</div>
+    <div class="sc-body">
+      ${ttFields}
+      <div class="field-row">
+        <div class="field"><label>Distance (km)</label>
+          <input type="number" step="0.1" id="${id}_km" placeholder="${s.kmT}" value="${sl.km||''}" oninput="autoSave(${wIdx},${sIdx})">
+        </div>
+        <div class="field"><label>Completed?</label>
+          <select id="${id}_done" onchange="autoSave(${wIdx},${sIdx})">
+            <option value="">—</option>
+            <option value="full" ${sl.done==='full'?'selected':''}>Full session</option>
+            <option value="partial" ${sl.done==='partial'?'selected':''}>Partial</option>
+            <option value="missed" ${sl.done==='missed'?'selected':''}>Missed</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>RPE · 1 easy → 10 max</label>
+        <div class="rpe-grid">${rpe}</div>
+      </div>
+      <div class="field"><label>Notes</label>
+        <textarea id="${id}_notes" placeholder="How did it feel? Terrain, weather, any issues…" oninput="autoSave(${wIdx},${sIdx})">${sl.notes||''}</textarea>
+      </div>
+    </div>
+  </div>`;
+}
+
+function setRpe(wIdx,sIdx,val,id){
+  [1,2,3,4,5,6,7,8,9,10].forEach(n=>{
+    const b=document.getElementById(`${id}_rpe_${n}`);
+    if(b){b.className='rpe-btn'+(n===val?` r${n}`:'');}
+  });
+  if(!log[wIdx])log[wIdx]={};
+  if(!log[wIdx][sIdx])log[wIdx][sIdx]={};
+  log[wIdx][sIdx].rpe=val;
+  saveLog(log);
+  buildStrip('week-selector','selectLogWeek',currentLogWeek);
+}
+
+function autoSave(wIdx,sIdx){
+  const id=`s_${wIdx}_${sIdx}`;
+  if(!log[wIdx])log[wIdx]={};
+  if(!log[wIdx][sIdx])log[wIdx][sIdx]={};
+  const sl=log[wIdx][sIdx];
+  const g=x=>document.getElementById(x);
+  if(g(`${id}_tt`))sl.ttTime=g(`${id}_tt`).value;
+  if(g(`${id}_km`))sl.km=g(`${id}_km`).value;
+  if(g(`${id}_done`))sl.done=g(`${id}_done`).value;
+  if(g(`${id}_notes`))sl.notes=g(`${id}_notes`).value;
+  saveLog(log);
+  buildStrip('week-selector','selectLogWeek',currentLogWeek);
+}
+
+function renderSummary(){
+  let sess=0,km=0,tts=[],wLogged=0;
+  PLAN.forEach((week,wi)=>{
+    const wl=log[wi]||{};
+    if(Object.keys(wl).length)wLogged++;
+    week.sessions.forEach((s,si)=>{
+      const sl=wl[si]||{};
+      if(sl.done&&sl.done!=='missed'){sess++;km+=parseFloat(sl.km||s.kmT);}
+      if(s.tt&&sl.ttTime){const p=sl.ttTime.split(':');if(p.length===2)tts.push({w:wi+1,secs:parseInt(p[0])*60+parseInt(p[1]),display:sl.ttTime});}
+    });
+  });
+  const pct=Math.round(wLogged/19*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('prog-label').textContent=`${wLogged} of 19 weeks logged`;
+  document.getElementById('stat-sessions').textContent=sess;
+  document.getElementById('stat-km').textContent=Math.round(km)+'km';
+  document.getElementById('stat-tts').textContent=tts.length;
+  const best=tts.length?tts.reduce((b,t)=>t.secs<b.secs?t:b):null;
+  document.getElementById('stat-best-tt').textContent=best?best.display:'—';
+
+  const ttChart=document.getElementById('tt-chart');
+  if(!tts.length){ttChart.innerHTML='<div style="color:var(--faint);font-size:12px;font-style:italic;align-self:center">No TT times logged yet</div>';}
+  else{
+    const mn=Math.min(...tts.map(t=>t.secs)),mx=Math.max(...tts.map(t=>t.secs)),rng=mx-mn||30;
+    ttChart.innerHTML=tts.map(t=>{
+      const h=20+((mx-t.secs)/rng)*80;
+      return `<div class="tt-col"><div class="tt-bar-time">${t.display}</div><div class="tt-bar" style="height:${h}%"></div><div class="tt-bar-wk">W${t.w}</div></div>`;
+    }).join('');
+  }
+
+  const logged=PLAN.map((w,wi)=>({w,wi,wl:log[wi]||{}})).filter(({wl})=>Object.keys(wl).length);
+  const hist=document.getElementById('week-history');
+  if(!logged.length){hist.innerHTML='<div style="color:var(--faint);font-size:12px;font-style:italic">No weeks logged yet.</div>';return;}
+  hist.innerHTML=logged.map(({w,wi,wl})=>{
+    const done=Object.values(wl).filter(s=>s.done&&s.done!=='missed').length;
+    const ttIdx=w.sessions.findIndex((s,si)=>s.tt&&wl[si]?.ttTime);
+    const tt=ttIdx>=0?wl[ttIdx].ttTime:null;
+    return `<div class="history-card" onclick="selectLogWeek(${wi});showPage('log',document.querySelectorAll('.nav-btn')[0])">
+      <div>
+        <div class="hc-title">Week ${w.w} · ${w.phase} · ${fmtShort(weekMonDate(w.w))}</div>
+        <div class="hc-sub">${done}/4 sessions completed · ${w.vol}km planned</div>
+      </div>
+      <div class="hc-right">
+        ${tt?`<div class="hc-tt">${tt}</div>`:''}
+        <div class="hc-sessions">4km TT</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderFbSelector(){buildStrip('fb-week-selector','selectFbWeek',currentFbWeek);}
+function selectFbWeek(idx){
+  currentFbWeek=idx;
+  buildStrip('fb-week-selector','selectFbWeek',idx);
+  document.getElementById('fb-week-label').textContent=`Week ${PLAN[idx].w} · ${PLAN[idx].phase}`;
+  document.getElementById('feedback-body').innerHTML='<span class="feedback-empty">Press Generate feedback to analyse this week.</span>';
+}
+
+async function generateFeedback(){
+  const btn=document.getElementById('gen-btn'),body=document.getElementById('feedback-body');
+  const wi=currentFbWeek,week=PLAN[wi],wLog=log[wi]||{};
+  if(!Object.keys(wLog).length){body.innerHTML='<span class="feedback-empty">No sessions logged for this week yet.</span>';return;}
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Analysing…';
+  body.innerHTML='<span class="feedback-empty">Generating coaching feedback…</span>';
+  const ttHistory=[];
+  PLAN.forEach((w,i)=>{const wl=log[i]||{};w.sessions.forEach((s,si)=>{if(s.tt&&wl[si]?.ttTime)ttHistory.push(`W${i+1}: ${wl[si].ttTime}`);});});
+  const summary=week.sessions.map((s,si)=>{
+    const sl=wLog[si]||{};
+    return `${s.day} ${s.date} — ${s.type}:\n  Planned: ${s.planned}\n  Completed: ${sl.done||'not logged'}\n  Distance: ${sl.km?sl.km+'km':'not logged'} (planned: ${s.kmT}km)\n  RPE: ${sl.rpe||'not logged'}/10\n  TT time: ${sl.ttTime||(s.tt?'not logged':'N/A')}\n  Notes: ${sl.notes||'none'}`;
+  }).join('\n\n');
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:`You are a running coach analysing a training week for an athlete preparing for a trail marathon on 5 December 2026.\n\nATHLETE: CS = 3.39 m/s (4:55/km), D' = 605m. Zones: Z1 6:33–7:33 · Z2 5:46–6:33 · Z3 5:10–5:46 · Z4 4:54–5:10 · Z5 4:27–4:54/km. 4km club TT alternate Wednesdays (baseline ~16:20, targets: sub-16:10 → sub-16:00). Schedule: Mon gym · Tue easy · Wed TT/quality · Thu gym · Fri easy · Sat long.\n\nWEEK ${week.w} OF 19 — ${week.phase} — ${week.vol}km planned, ${week.long}km long run.\n\n${summary}\n\nTT HISTORY: ${ttHistory.length?ttHistory.join(', '):'None yet'}\n\nWrite a direct, coach-like analysis in 3–5 short paragraphs. No bullet points. Address the athlete directly. Cover: (1) overall execution, (2) effort distribution — were easy runs easy (RPE 3–5) and quality sessions hard enough (RPE 7–9), (3) TT analysis if applicable, (4) one thing done well, (5) one specific focus for Week ${week.w+1}.`}]})});
+    const data=await res.json();
+    const text=data.content?.map(c=>c.text||'').join('')||'';
+    if(!text)throw new Error();
+    body.innerHTML=text.split('\n\n').filter(p=>p.trim()).map(p=>`<p>${p.trim()}</p>`).join('');
+  }catch(e){body.innerHTML='<span class="feedback-empty">Could not generate feedback. Check your connection and try again.</span>';}
+  btn.disabled=false;btn.innerHTML='Regenerate';
+}
+
+function exportData(){
+  const blob=new Blob([JSON.stringify({version:1,exportDate:new Date().toISOString(),raceDate:'2026-12-05',log},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`trail-log-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();URL.revokeObjectURL(a.href);
+  showToast('Log exported');
+}
+
+function toggleImport(){
+  const el=document.getElementById('import-area');
+  el.style.display=el.style.display==='block'?'none':'block';
+}
+
+function importData(){
+  try{
+    const parsed=JSON.parse(document.getElementById('import-json').value.trim());
+    if(!parsed.log)throw new Error();
+    if(!confirm('Overwrite current log with imported data?'))return;
+    log=parsed.log;saveLog(log);
+    document.getElementById('import-area').style.display='none';
+    document.getElementById('import-json').value='';
+    buildStrip('week-selector','selectLogWeek',currentLogWeek);
+    renderLogWeek(currentLogWeek);
+    showToast('Log imported');
+  }catch(e){alert('Invalid backup file.');}
+}
+
+function clearData(){
+  if(!confirm('Delete all logged data? Export first if you want a backup.'))return;
+  log={};saveLog(log);
+  buildStrip('week-selector','selectLogWeek',currentLogWeek);
+  renderLogWeek(currentLogWeek);
+  showToast('Data cleared');
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+buildStrip('week-selector','selectLogWeek',0);
+renderLogWeek(0);
+</script>
+</body>
+</html>
