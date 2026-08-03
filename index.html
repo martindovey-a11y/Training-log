@@ -149,6 +149,16 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .toast.show{opacity:1;}
 @media(max-width:520px){.stat-grid{grid-template-columns:repeat(2,1fr);}.field-row{grid-template-columns:1fr;}.topbar-meta{display:none;}}
 
+
+.wh-sessions { display:grid; gap:7px; }
+.wh-session-row { display:flex; align-items:center; gap:10px; padding:7px 10px; background:rgba(255,255,255,0.06); border-radius:8px; border:1px solid rgba(255,255,255,0.08); }
+.wh-session-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.wh-session-info { flex:1; display:flex; align-items:center; gap:8px; min-width:0; }
+.wh-session-day { font-family:var(--tight); font-size:11px; font-weight:700; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:0.05em; flex-shrink:0; width:28px; }
+.wh-session-type { font-size:12px; font-weight:500; color:rgba(255,255,255,0.85); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.wh-tt-dot { font-size:9px; font-weight:700; padding:1px 5px; border-radius:3px; background:rgba(224,122,95,0.5); color:#F5A090; vertical-align:middle; }
+.wh-session-km { font-family:var(--tight); font-size:12px; font-weight:700; color:rgba(255,255,255,0.9); flex-shrink:0; }
+.wh-session-planned { color:rgba(255,255,255,0.35); font-weight:500; }
 </style>
 </head>
 <body>
@@ -411,14 +421,30 @@ function renderLogWeek(idx){
   const mon=weekMonDate(week.w);
   const sat=new Date(mon.getTime()+5*86400000);
   let html='<div class="week-hero">';
-  html+='<div class="wh-eyebrow">Week '+week.w+' of 19</div>';
+  html+='<div class="wh-eyebrow">Week '+week.w+' of 19 &middot; '+fmtShort(mon)+' to '+fmtShort(sat)+'</div>';
   html+='<div class="wh-title">'+week.phase+' Phase</div>';
-  html+='<div class="wh-sub">'+fmtShort(mon)+' to '+fmtShort(sat)+'</div>';
-  html+='<div class="wh-pills">';
+  html+='<div class="wh-pills" style="margin-bottom:14px">';
   html+='<div class="wh-pill wh-pill-phase">'+week.phase+'</div>';
   html+='<div class="wh-pill">'+week.vol+'km planned</div>';
   html+='<div class="wh-pill">Long run '+week.long+'km</div>';
-  html+='</div></div>';
+  html+='</div>';
+  html+='<div class="wh-sessions">';
+  week.sessions.forEach(function(s,si){
+    const sl=wLog[si]||{};
+    const done=sl.done==='full'?'done':sl.done==='partial'?'partial':sl.done==='missed'?'missed':'pending';
+    const dotCol=done==='done'?'#2D9E6B':done==='partial'?'#D4860A':done==='missed'?'#DC4C3E':'rgba(255,255,255,0.25)';
+    html+='<div class="wh-session-row">';
+    html+='<div class="wh-session-dot" style="background:'+dotCol+'"></div>';
+    html+='<div class="wh-session-info">';
+    html+='<span class="wh-session-day">'+s.day+'</span>';
+    html+='<span class="wh-session-type">'+s.type+(s.tt?' <span class="wh-tt-dot">TT</span>':'')+'</span>';
+    html+='</div>';
+    if(sl.km)html+='<div class="wh-session-km">'+sl.km+'km</div>';
+    else html+='<div class="wh-session-km wh-session-planned">'+s.kmT+'km</div>';
+    html+='</div>';
+  });
+  html+='</div>';
+  html+='</div>';
   html+='<div class="sessions-list">';
   week.sessions.forEach(function(s,si){
     html+=sessionCard(idx,si,s,wLog[si]||{});
